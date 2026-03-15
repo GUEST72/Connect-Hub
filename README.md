@@ -122,9 +122,3 @@ Project data is persisted in local JSON files:
 2. Ensure dependencies are configured.
 3. Run `Main.java`.
 
-## Notes
-
-- The app still supports the original user flows.
-- The refactor makes it easier to add features without rewriting the UI.
-- New modules are designed so a future storage backend (SQL/NoSQL) can replace JSON with minimal service-layer impact.
-
