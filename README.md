@@ -1,145 +1,130 @@
 # ConnectHub
 
-ConnectHub is a Java Swing social platform that includes authentication, friend management, profile management, posts/stories, and an extensible social interaction backbone.
+ConnectHub is a Java Swing social platform with local JSON persistence.
 
-This repository was refactored into a cleaner modular architecture and extended with scalable Group, Chat, and Notification capabilities while preserving legacy application behavior.
+This project includes both:
 
-## Project Overview
+- The original core social app features (auth, friends, profile, posts, stories, feed)
+- A full architectural refactor that keeps legacy behavior while making the codebase more modular
+- New major capabilities: groups, direct chat, and event-driven notifications
 
-ConnectHub provides:
+## Full Project Scope
 
-- User sign-up/login with hashed passwords
-- Friend requests, acceptance/rejection, blocking, and suggestions
-- Feed generation from friends' posts and stories
-- User profile viewing and editing
-- Group management (create/join/leave/view members/post in groups)
-- Direct messaging with conversation history
-- Event-driven notifications for activity (messages, friend requests, posts, group activity)
+### Original Baseline Features
 
-## Architecture Overview
+- User registration and login
+- Password hashing for credential storage
+- Friend request lifecycle:
+	sent, received, accept, reject, cancel, remove, block, unblock
+- News feed that shows friends' posts and stories
+- Story expiration behavior
+- Profile management:
+	profile photo, cover photo, bio, personal posts
+- Desktop GUI flows built with Swing forms
 
-The project now follows a modular layered design:
+### New Features Added
 
-- Presentation layer: Swing windows (legacy-compatible UI classes)
-- Application/service layer: business use-cases and orchestration
-- Domain layer: entities such as User, Group, Message, Notification
-- Data access layer: repository interfaces + JSON implementations
-- Event layer: publish/subscribe event bus for decoupled notifications
-- Factory/composition layer: centralized dependency wiring
+- Group system:
+	create groups, join/leave, view members, post in groups
+- Chat system:
+	direct messaging and conversation history
+- Notification system:
+	notifications for messages, friend requests, posts, and group activity
 
-## Folder and Module Structure
+## Architecture (Current)
+
+I refactored the project into layered modules so responsibilities are clearer and future changes are safer.
+
+- UI layer:
+	Swing windows and form bindings
+- Service layer:
+	business use-cases and orchestration
+- Repository layer:
+	persistence abstraction and JSON implementations
+- Domain model layer:
+	entities and core data structures
+- Event layer:
+	publish/subscribe flow used by notifications
+- Composition layer:
+	centralized dependency wiring
+
+Main modular packages:
 
 ```text
-src/
-├── com/connecthub/
-│   ├── model/                  # Core domain entities
-│   ├── repository/             # Repository interfaces
-│   ├── repository/json/        # JSON-backed repository implementations
-│   ├── service/                # Service contracts
-│   ├── service/impl/           # Service implementations
-│   ├── events/                 # Domain events and event bus (Observer/Pub-Sub)
-│   ├── factory/                # Dependency composition (ConnectHubFactory)
-│   └── util/                   # Shared utilities (hashing, validation)
-├── LoginWindow.java            # Legacy UI entry windows (preserved)
-├── SignUpWindow.java
-├── NewsFeedWindow.java
-├── FriendManagementWindow.java
-├── myProfile.java
-├── AccountManagement.java      # Legacy compatibility facades over new services
-├── FriendManagement.java
-├── NewsFeed.java
-├── ProfileManager.java
-├── MainContentCreation.java
-├── UserDatabase.java
-├── ConnectHubContext.java      # Legacy bridge to modern factory
-├── LegacyMapper.java           # Legacy-modern model mapper
-├── GroupManagement.java        # Group feature adapter
-├── ChatManagement.java         # Chat feature adapter
-└── NotificationDispatcher.java # Notification feature adapter
-
-users.json
-posts.json
-stories.json
-groups.json
-conversations.json
-notifications.json
+src/com/connecthub/
+├── model/
+├── repository/
+├── repository/json/
+├── service/
+├── service/impl/
+├── events/
+├── factory/
+└── util/
 ```
 
-## Major Refactoring Improvements
+## Legacy + Modern Coexistence
 
-- Introduced clear separation between models, repositories, services, events, and utilities
-- Moved business logic out of persistence and UI-heavy classes into dedicated service layer
-- Reduced duplicated hashing/lookup/persistence patterns via shared components
-- Added factory-based dependency composition to avoid ad-hoc object creation
-- Preserved existing legacy APIs to minimize UI breakage and migration risk
+To avoid breaking the existing windows and workflows, I kept legacy entry classes in `src/` and routed them to the new service modules through adapters.
 
-## SOLID Principles Applied
+Examples:
 
-- Single Responsibility Principle:
-	each repository/service class owns one focused responsibility
-- Open/Closed Principle:
-	service contracts and repository interfaces allow extension without modifying callers
-- Liskov Substitution Principle:
-	code depends on abstractions (`*Service`, `*Repository`) and can swap implementations
-- Interface Segregation Principle:
-	narrow interfaces per subsystem (Account, Friend, Feed, Profile, Group, Chat, Notification)
-- Dependency Inversion Principle:
-	higher-level modules depend on interfaces, with concrete dependencies wired in `ConnectHubFactory`
+- Compatibility bridge:
+	`ConnectHubContext`
+- Mapping between legacy and modular models:
+	`LegacyMapper`
+- Legacy facades still usable by UI:
+	`AccountManagement`, `FriendManagement`, `NewsFeed`, `ProfileManager`, `MainContentCreation`, `UserDatabase`
 
-## Design Patterns Introduced
+## Engineering Improvements
 
-- Repository Pattern: abstraction over JSON persistence
-- Factory Pattern: `ConnectHubFactory` composes the app graph
-- Strategy-like decoupling via interfaces: multiple service/repository implementations are swappable
-- Observer / Publish-Subscribe Pattern: `EventBus` + `NotificationEventSubscriber`
-- Facade Pattern: legacy classes (`AccountManagement`, `FriendManagement`, etc.) act as compatibility facades over the modern layer
-- Singleton-style access point: `ConnectHubContext` exposes one shared factory instance for legacy code
+- Reduced duplicated logic (hashing, lookup, repeated persistence flows)
+- Split large responsibilities into focused services/repositories
+- Lowered coupling between UI classes and data access details
+- Introduced cleaner dependency composition via `ConnectHubFactory`
+- Kept behavior stable while migrating internals incrementally
 
-## New Features
+## SOLID and Patterns Used
 
-### Group System
+Applied SOLID principles across the modular layer:
 
-- Create group with owner role
-- Join and leave groups
-- View group members
-- Add posts inside a group
-- Backed by `GroupService` + `GroupRepository` (`groups.json`)
+- SRP:
+	each service/repository focuses on one concern
+- OCP:
+	interfaces allow extensions with minimal caller changes
+- LSP:
+	high-level logic targets abstractions
+- ISP:
+	feature-based, focused service interfaces
+- DIP:
+	dependency wiring handled at composition boundaries
 
-### Chat System
+Design patterns used:
 
-- Direct messages between users
-- Conversation auto-creation per user pair
-- Message history retrieval
-- Backed by `ChatService` + `ConversationRepository` (`conversations.json`)
+- Repository pattern
+- Factory pattern
+- Observer / publish-subscribe pattern
+- Facade pattern (for legacy compatibility)
 
-### Notification System
+## Data Files
 
-- Event-driven notifications for:
-	- new direct messages
-	- friend request activity
-	- post activity
-	- group activity
-- Backed by `NotificationService` + `NotificationRepository` (`notifications.json`)
-- Uses `EventBus` and `NotificationEventSubscriber`
+Project data is persisted in local JSON files:
 
-## Why This Architecture Scales Better
+- `users.json`
+- `posts.json`
+- `stories.json`
+- `groups.json`
+- `conversations.json`
+- `notifications.json`
 
-- New features can be added at service/repository boundaries without rewriting UI windows
-- Event-driven notifications reduce tight coupling between social actions and side effects
-- Repository contracts make future migration from JSON to SQL/NoSQL straightforward
-- Compatibility facade approach allows iterative migration with low regression risk
-- Cleaner modules and shorter methods improve maintenance and onboarding
-
-## Running the Application
+## Run
 
 1. Open the project in IntelliJ IDEA.
-2. Ensure required dependencies are available in the IDE project configuration.
+2. Ensure dependencies are configured.
 3. Run `Main.java`.
-4. The app will use local JSON files as storage.
 
 ## Notes
 
-- Existing UI behavior is preserved while internal architecture is modernized.
-- Legacy classes remain available as adapters to prevent disruptive UI rewrites.
-- New Group/Chat/Notification features are available through the new service layer and adapters.
+- The app still supports the original user flows.
+- The refactor makes it easier to add features without rewriting the UI.
+- New modules are designed so a future storage backend (SQL/NoSQL) can replace JSON with minimal service-layer impact.
 
