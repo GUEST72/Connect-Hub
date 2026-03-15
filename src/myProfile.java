@@ -1,13 +1,10 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.List;
 
 public class myProfile extends JFrame {
 private User user ;
@@ -15,7 +12,6 @@ private ProfileManager profileManager;
     DateTimeFormatter dtf= DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private FriendManagement friend;
     private UserDatabase userDatabase;
-    private MainContentCreation content;
     private JPanel thePanel;
     private JButton uploadprofile;
     private JButton uploadcover;

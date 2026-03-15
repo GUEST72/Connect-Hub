@@ -1,13 +1,9 @@
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Map;
 
 public class AccountManagement {
-    private final UserDatabase userDatabase;
     private final com.connecthub.service.AccountService accountService;
 
     public AccountManagement( UserDatabase userDatabase) {
-        this.userDatabase = userDatabase;
         this.accountService = ConnectHubContext.factory().accountService();
     }
     /*
