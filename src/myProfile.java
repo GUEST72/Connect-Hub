@@ -48,6 +48,8 @@ private ProfileManager profileManager;
         loadnewdata();
         loadPosts();
         loadFriendStatus();
+        wireProfileEditingActions();
+        wireNavigationActions();
 
         addWindowListener(new WindowAdapter() {
             @Override
@@ -56,93 +58,68 @@ private ProfileManager profileManager;
                 userDatabase.saveUsersToFile(profileManager.getAllUsers());
             }
         });
+    }
 
-        uploadprofile.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String path=chooseFile();
-                if(path==null){
-                    JOptionPane.showMessageDialog(null, "No photo was uploaded");
-                    return;
-
-                }
-                else{
-                    user.setProfilePhotoPath(path);
-                    userDatabase.saveUsersToFile(profileManager.getAllUsers());
-                    loadnewdata();
-                }
+    private void wireProfileEditingActions() {
+        uploadprofile.addActionListener(e -> {
+            String path = chooseFile();
+            if (path == null) {
+                JOptionPane.showMessageDialog(null, "No photo was uploaded");
+                return;
             }
+            user.setProfilePhotoPath(path);
+            userDatabase.saveUsersToFile(profileManager.getAllUsers());
+            loadnewdata();
         });
 
-
-        uploadcover.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-        String path=chooseFile();
-        if(path==null){
-            JOptionPane.showMessageDialog(null, "No photo was uploaded");
-            return;
-
-        }
-        else{
+        uploadcover.addActionListener(e -> {
+            String path = chooseFile();
+            if (path == null) {
+                JOptionPane.showMessageDialog(null, "No photo was uploaded");
+                return;
+            }
             user.setCoverPhotoPath(path);
             userDatabase.saveUsersToFile(profileManager.getAllUsers());
             loadnewdata();
-        }
-            }
-        });
-        uploadbio.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String newBio= JOptionPane.showInputDialog(null, "Enter Bio");
-                if(newBio==null){
-                    JOptionPane.showMessageDialog(null, "No bio was uploaded");
-                }
-                else{
-                    user.setBio(newBio);
-                    userDatabase.saveUsersToFile(profileManager.getAllUsers());
-                    loadnewdata();
-                }
-            }
-        });
-        refreshButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                loadnewdata();
-                loadPosts();
-            }
         });
 
-        logOutButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                profileManager.getCurrentUser().setStatus("Offline");
-                userDatabase.saveUsersToFile(profileManager.getAllUsers());
-                try {
-                    new LoginWindow();
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-                dispose();
+        uploadbio.addActionListener(e -> {
+            String newBio = JOptionPane.showInputDialog(null, "Enter Bio");
+            if (newBio == null) {
+                JOptionPane.showMessageDialog(null, "No bio was uploaded");
+                return;
             }
+            user.setBio(newBio);
+            userDatabase.saveUsersToFile(profileManager.getAllUsers());
+            loadnewdata();
         });
 
-        myFriendsButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        refreshButton.addActionListener(e -> {
+            loadnewdata();
+            loadPosts();
+        });
+    }
 
-                new FriendManagementWindow(user);
-                dispose();
-
-           }
+    private void wireNavigationActions() {
+        logOutButton.addActionListener(e -> {
+            profileManager.getCurrentUser().setStatus("Offline");
+            userDatabase.saveUsersToFile(profileManager.getAllUsers());
+            try {
+                new LoginWindow();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+            dispose();
         });
 
-        newsFeedButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new NewsFeedWindow(user);
-                dispose();
-            }
+        myFriendsButton.addActionListener(e -> {
+            new FriendManagementWindow(user);
+            dispose();
+        });
+
+        newsFeedButton.addActionListener(e -> {
+            new NewsFeedWindow(user);
+            dispose();
         });
     }
 
